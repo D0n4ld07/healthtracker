@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block title %}Charts - Health Tracker{% endblock %}
+{% block content %}
+<h2 class="text-2xl font-semibold mb-4">Charts</h2>
+
+<div class="card bg-base-100 shadow mb-4">
+  <div class="card-body">
+    <div class="flex flex-wrap gap-3 items-end">
+      <div>
+        <label class="label"><span class="label-text">Range</span></label>
+        <select id="range" class="select select-bordered">
+          <option value="all">All</option>
+          <option value="today">Today</option>
+          <option value="week">This Week</option>
+          <option value="month">This Month</option>
+          <option value="custom">Custom</option>
+        </select>
+      </div>
+      <div>
+        <label class="label"><span class="label-text">Group By</span></label>
+        <select id="group_by" class="select select-bordered">
+          <option value="day">Day</option>
+          <option value="week">Week</option>
+          <option value="month">Month</option>
+        </select>
+      </div>
+      <div id="custom_range" class="hidden flex gap-2">
+        <div>
+          <label class="label"><span class="label-text">Start</span></label>
+          <input id="start" type="date" class="input input-bordered"/>
+        </div>
+        <div>
+          <label class="label"><span class="label-text">End</span></label>
+          <input id="end" type="date" class="input input-bordered"/>
+        </div>
+      </div>
+      <div>
+        <label class="label"><span class="label-text">Fitness Metric</span></label>
+        <select id="fitness_metric" class="select select-bordered">
+          <option value="calories">Calories</option>
+          <option value="duration">Duration</option>
+        </select>
+      </div>
+      <button id="reload" class="btn btn-primary">Apply</button>
+    </div>
+  </div>
+</div>
+
+<div class="grid md:grid-cols-2 gap-6">
+  <div class="card bg-base-100 shadow"><div class="card-body"><h3 class="card-title">Weight & BMI</h3><canvas id="wchart"></canvas></div></div>
+  <div class="card bg-base-100 shadow"><div class="card-body"><h3 class="card-title">Calories In</h3><canvas id="mchart"></canvas></div></div>
+  <div class="card bg-base-100 shadow"><div class="card-body"><h3 class="card-title">Fitness</h3><canvas id="fchart"></canvas></div></div>
+  <div class="card bg-base-100 shadow"><div class="card-body"><h3 class="card-title">Sleep Hours</h3><canvas id="schart"></canvas></div></div>
+</div>
+
+<script>
+  const rangeSel = document.getElementById('range');
+  const groupSel = document.getElementById('group_by');
+  const customWrap = document.getElementById('custom_range');
+  const startInp = document.getElementById('start');
+  const endInp = document.getElementById('end');
+  const metricSel = document.getElementById('fitness_metric');
+  const reloadBtn = document.getElementById('reload');
+
+  rangeSel.addEventListener('change', () => {
+    customWrap.classList.toggle('hidden', rangeSel.value !== 'custom');
+  });
+
+  let wchart, mchart, fchart, schart;
+
+  async function fetchData(kind, extra={}) {
+    const params = new URLSearchParams({
+      range: rangeSel.value,
+      group_by: groupSel.value,
+      ...extra
+    });
+    if (rangeSel.value === 'custom') {
+      if (startInp.value) params.set('start', startInp.value);
+      if (endInp.value) params.set('end', endInp.value);
+    }
+    const res = await fetch(`/api/charts/${kind}?` + params.toString());
+    return res.json();
+  }
+
+  function makeChart(ctx, type, labels, datasets) {
+    return new Chart(ctx, {
+      type,
+      data: { labels, datasets },
+      options: { responsive: true, plugins: { legend: { position: 'top' } } }
+    });
+  }
+
+  async function loadAll() {
+    // weight (line)
+    const w = await fetchData('weight');
+    if (wchart) wchart.destroy();
+    wchart = makeChart(document.getElementById('wchart'), 'line', w.labels, w.series.map(s => ({label:s.name, data:s.data})));
+    // meals
+    const m = await fetchData('meals');
+    if (mchart) mchart.destroy();
+    mchart = makeChart(document.getElementById('mchart'), 'bar', m.labels, m.series.map(s => ({label:s.name, data:s.data})));
+    // fitness
+    const f = await fetchData('fitness', {metric: metricSel.value});
+    if (fchart) fchart.destroy();
+    fchart = makeChart(document.getElementById('fchart'), 'bar', f.labels, f.series.map(s => ({label:s.name, data:s.data})));
+    // sleep
+    const s = await fetchData('sleep');
+    if (schart) schart.destroy();
+    schart = makeChart(document.getElementById('schart'), 'line', s.labels, s.series.map(s => ({label:s.name, data:s.data})));
+  }
+
+  reloadBtn.addEventListener('click', loadAll);
+  loadAll();
+</script>
+{% endblock %}

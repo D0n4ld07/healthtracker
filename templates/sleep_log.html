@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Sleep Log - Health Tracker{% endblock %}
+{% block content %}
+<h2 class="text-2xl font-semibold mb-4">Sleep Log</h2>
+<div class="grid md:grid-cols-2 gap-6">
+  <div class="card bg-base-100 shadow"><div class="card-body">
+    <h3 class="card-title">Add Sleep</h3>
+    <form method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <label class="form-control">
+        <div class="label"><span class="label-text">Sleep Start</span></div>
+        <input name="sleep_start" type="datetime-local" required class="input input-bordered"/>
+      </label>
+      <label class="form-control">
+        <div class="label"><span class="label-text">Wake Up</span></div>
+        <input name="sleep_end" type="datetime-local" required class="input input-bordered"/>
+      </label>
+      <button class="btn btn-primary mt-4">Add</button>
+    </form>
+    <p class="text-sm opacity-70 mt-2">Cross-day supported, e.g., 23:30 → 06:45.</p>
+  </div></div>
+
+  <div class="card bg-base-100 shadow overflow-x-auto">
+    <div class="card-body">
+      <h3 class="card-title">History</h3>
+      <table class="table">
+        <thead><tr><th>Start</th><th>End</th><th>Duration</th><th></th></tr></thead>
+        <tbody>
+          {% for r in rows %}
+          <tr>
+            <td>{{ r.sleep_start }}</td>
+            <td>{{ r.sleep_end }}</td>
+            <td>{{ "%.2f"|format(r.duration_hours) }} h</td>
+            <td>
+              <form method="post" action="{{ url_for('sleep_delete', rid=r.id) }}" onsubmit="return confirm('Delete this record?');">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button class="btn btn-sm btn-error">Delete</button>
+              </form>
+            </td>
+          </tr>
+          {% else %}
+          <tr><td colspan="4">No records</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Auth - Health Tracker{% endblock %}
+{% block content %}
+<div class="max-w-3xl mx-auto grid md:grid-cols-2 gap-6">
+  <!-- Login -->
+  <div class="card bg-base-100 shadow">
+    <div class="card-body">
+      <h2 class="card-title">Login</h2>
+      <form method="post" action="{{ url_for('auth') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="action" value="login">
+        <label class="form-control w-full">
+          <div class="label"><span class="label-text">Email</span></div>
+          <input name="email" type="email" required class="input input-bordered w-full"/>
+        </label>
+        <label class="form-control w-full">
+          <div class="label"><span class="label-text">Password</span></div>
+          <input name="password" type="password" minlength="8" required class="input input-bordered w-full"/>
+        </label>
+        <button class="btn btn-primary mt-4 w-full">Login</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Register -->
+  <div class="card bg-base-100 shadow">
+    <div class="card-body">
+      <h2 class="card-title">Register</h2>
+      <form method="post" action="{{ url_for('auth') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="action" value="register">
+        <label class="form-control w-full">
+          <div class="label"><span class="label-text">Username</span></div>
+          <input name="username" required class="input input-bordered w-full"/>
+        </label>
+        <label class="form-control w-full">
+          <div class="label"><span class="label-text">Email</span></div>
+          <input name="email" type="email" required class="input input-bordered w-full"/>
+        </label>
+        <label class="form-control w-full">
+          <div class="label"><span class="label-text">Password (≥8 chars)</span></div>
+          <input name="password" type="password" minlength="8" required class="input input-bordered w-full"/>
+        </label>
+        <button class="btn btn-success mt-4 w-full">Create Account</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

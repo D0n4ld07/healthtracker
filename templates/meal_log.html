@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Meal Log - Health Tracker{% endblock %}
+{% block content %}
+<h2 class="text-2xl font-semibold mb-4">Meal Log</h2>
+<div class="grid md:grid-cols-2 gap-6">
+  <div class="card bg-base-100 shadow"><div class="card-body">
+    <h3 class="card-title">Add Meal</h3>
+    <form method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <label class="form-control">
+        <div class="label"><span class="label-text">Date</span></div>
+        <input name="date" type="date" required class="input input-bordered"/>
+      </label>
+      <label class="form-control">
+        <div class="label"><span class="label-text">Meal Type</span></div>
+        <select name="meal_type" class="select select-bordered">
+          <option>Breakfast</option><option>Lunch</option><option>Dinner</option>
+        </select>
+      </label>
+      <label class="form-control">
+        <div class="label"><span class="label-text">Food</span></div>
+        <input name="food" required class="input input-bordered"/>
+      </label>
+      <label class="form-control">
+        <div class="label"><span class="label-text">Calories (kcal)</span></div>
+        <input name="calories" type="number" min="1" required class="input input-bordered"/>
+      </label>
+      <button class="btn btn-primary mt-4">Add</button>
+    </form>
+  </div></div>
+
+  <div class="card bg-base-100 shadow overflow-x-auto">
+    <div class="card-body">
+      <h3 class="card-title">History</h3>
+      <table class="table">
+        <thead><tr><th>Date</th><th>Meal</th><th>Food</th><th>Calories</th><th></th></tr></thead>
+        <tbody>
+          {% for r in rows %}
+          <tr>
+            <td>{{ r.date }}</td>
+            <td>{{ r.meal_type }}</td>
+            <td>{{ r.food }}</td>
+            <td>{{ r.calories }}</td>
+            <td>
+              <form method="post" action="{{ url_for('meals_delete', rid=r.id) }}" onsubmit="return confirm('Delete this record?');">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button class="btn btn-sm btn-error">Delete</button>
+              </form>
+            </td>
+          </tr>
+          {% else %}
+          <tr><td colspan="5">No records</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

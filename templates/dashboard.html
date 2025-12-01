@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - Health Tracker{% endblock %}
+{% block content %}
+<h2 class="text-2xl font-semibold mb-4">Dashboard</h2>
+<div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+  <div class="card bg-base-100 shadow"><div class="card-body">
+    <h3 class="card-title">Total Calories In (today)</h3><p class="text-2xl">{{ total_in }} kcal</p>
+  </div></div>
+  <div class="card bg-base-100 shadow"><div class="card-body">
+    <h3 class="card-title">Total Calories Out (today)</h3><p class="text-2xl">{{ total_out }} kcal</p>
+  </div></div>
+  <div class="card bg-base-100 shadow"><div class="card-body">
+    <h3 class="card-title">Avg Sleep (last 7 days)</h3><p class="text-2xl">{{ avg_sleep }} h</p>
+  </div></div>
+  <div class="card bg-base-100 shadow"><div class="card-body">
+    <h3 class="card-title">Latest BMI</h3><p class="text-2xl">{{ last_bmi if last_bmi is not none else '—' }}</p>
+  </div></div>
+</div>
+
+<div class="grid md:grid-cols-3 gap-4 mt-6">
+  <div class="card bg-base-100 shadow md:col-span-2">
+    <div class="card-body">
+      <h3 class="card-title">Goal Gap</h3>
+      <ul class="list-disc pl-6">
+        <li>Weight gap：{{ diffs.weight if diffs.weight is not none else 'No target set or no weight record yet' }}</li>
+        <li>Remaining intake today：{{ diffs.calorie if diffs.calorie is not none else 'No daily intake target' }} kcal</li>
+        <li>Remaining exercise today：{{ diffs.exercise if diffs.exercise is not none else 'No daily exercise target' }} min</li>
+      </ul>
+    </div>
+  </div>
+  <div class="card bg-base-100 shadow">
+    <div class="card-body">
+      <h3 class="card-title">Smart Suggestions</h3>
+      {% if suggestions %}
+        <ul class="list-disc pl-6">
+          {% for s in suggestions %}<li>{{ s }}</li>{% endfor %}
+        </ul>
+      {% else %}
+        <p>Keep it up!</p>
+      {% endif %}
+      <a class="btn btn-outline btn-sm mt-3" href="{{ url_for('goals') }}">Edit Goals</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
